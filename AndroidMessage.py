@@ -37,13 +37,19 @@ def GetMessage(session):
         sms = droid.smsGetMessageById(_id, ["address", "body"])
         sms_address = sms[1]["address"]
         sms_body = sms[1]["body"]
-        if sms_address == SMS_FILTER:
-            code = re.compile(r"(.\d*).(Para)").findall(sms_body)
-            if code:
-                OTP_code, _ = code[0]
-                if not sms_list:
-                    AddSMS(session, OTP_code)
+        if sms_address == SMS_FILTER: # sms sender filter by sms name or phone number
+            card_add_code = re.compile(r"(\d*).(dogrulama)").findall(sms_body) # filters if there is a password in the sms. Detail: https://pynative.com/python-regex-compile/
+            purchase_code = re.compile(r"(\d*).(sifresi)").findall(sms_body) # filters if there is a password in the sms. Detail: https://pynative.com/python-regex-compile/
+            if card_add_code:
+                OTP_code, _ = card_add_code[0]
+                if OTP_code not in sms_list:
                     sms_list.append(OTP_code)
+                    AddSMS(session, OTP_code)
+            if purchase_code:
+                OTP_code, _ = purchase_code[0]
+                if OTP_code not in sms_list:
+                    sms_list.append(OTP_code)
+                    AddSMS(session, OTP_code)
 
 #################################### SEND THE MESSAGE TO THE SERVER #####################################             
 
